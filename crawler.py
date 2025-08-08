@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
 from models import db, Page
 from app import create_app
+from utils import safe_print
 
 def crawl_site(site_id, start_url):
     """
@@ -25,13 +26,13 @@ def crawl_site(site_id, start_url):
             if current_url in visited_urls:
                 continue
 
-            print(f"Crawling: {current_url}")
+            safe_print(f"Crawling: {current_url}")
 
             try:
                 response = requests.get(current_url, timeout=5)
                 response.raise_for_status() # Raise an exception for bad status codes
             except requests.RequestException as e:
-                print(f"Error fetching {current_url}: {e}")
+                safe_print(f"Error fetching {current_url}: {e}")
                 continue
 
             visited_urls.add(current_url)
@@ -52,4 +53,4 @@ def crawl_site(site_id, start_url):
                     queue.append(absolute_link)
 
         db.session.commit()
-        print(f"Finished crawling for site {site_id}.")
+        safe_print(f"Finished crawling for site {site_id}.")

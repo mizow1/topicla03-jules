@@ -1,15 +1,16 @@
 import time
 from models import db, TopicCluster, Article
 from app import create_app
+from utils import safe_print
 
 def _mock_llm_call(prompt):
     """
     A mock function to simulate a call to a Large Language Model.
     In a real application, this would be replaced with a call to an actual LLM API.
     """
-    print("--- MOCK LLM CALL ---")
-    print(f"PROMPT:\n{prompt}")
-    print("--------------------")
+    safe_print("--- MOCK LLM CALL ---")
+    safe_print(f"PROMPT:\n{prompt}")
+    safe_print("--------------------")
     time.sleep(2) # Simulate network latency and processing time
 
     # Extracting the title from the prompt for a more dynamic mock response
@@ -72,12 +73,12 @@ def generate_article_for_cluster(cluster_id):
     with app.app_context():
         cluster = db.session.get(TopicCluster, cluster_id)
         if not cluster:
-            print(f"Cluster with ID {cluster_id} not found.")
+            safe_print(f"Cluster with ID {cluster_id} not found.")
             return
 
         # Check if an article already exists
         if cluster.articles:
-            print(f"Article for cluster '{cluster.name}' already exists. Skipping.")
+            safe_print(f"Article for cluster '{cluster.name}' already exists. Skipping.")
             return
 
         pillar_topic = cluster.parent.name if cluster.parent else "a general topic"
@@ -113,7 +114,7 @@ You are an expert SEO content writer. Your task is to write a comprehensive, hig
             title = next(line for line in header.split('\n') if line.startswith("TITLE:")).replace("TITLE:", "").strip()
             meta_description = next(line for line in header.split('\n') if line.startswith("META_DESCRIPTION:")).replace("META_DESCRIPTION:", "").strip()
         except (ValueError, StopIteration):
-            print("Error parsing LLM response. Saving with placeholder data.")
+            safe_print("Error parsing LLM response. Saving with placeholder data.")
             title = cluster.name.title()
             meta_description = f"An in-depth look at {cluster.name}."
             body_markdown = generated_content # Save the whole thing if parsing fails
@@ -128,4 +129,4 @@ You are an expert SEO content writer. Your task is to write a comprehensive, hig
         )
         db.session.add(new_article)
         db.session.commit()
-        print(f"Successfully generated and saved article for cluster: '{cluster.name}'")
+        safe_print(f"Successfully generated and saved article for cluster: '{cluster.name}'")

@@ -3,6 +3,7 @@ import string
 from sklearn.feature_extraction.text import TfidfVectorizer
 from models import db, Page, TopicCluster
 from app import create_app
+from utils import safe_print
 
 def download_nltk_data():
     """Download necessary NLTK data."""
@@ -49,7 +50,7 @@ def analyze_site_content(site_id):
     with app.app_context():
         pages = Page.query.filter_by(site_id=site_id).all()
         if not pages:
-            print("No pages found for this site to analyze.")
+            safe_print("No pages found for this site to analyze.")
             return
 
         documents = [page.content for page in pages]
@@ -67,9 +68,9 @@ def analyze_site_content(site_id):
         tfidf_scores = [(feature_names[i], sum_tfidf[0, i]) for i in range(len(feature_names))]
         sorted_tfidf = sorted(tfidf_scores, key=lambda x: x[1], reverse=True)
 
-        print(f"Top 10 keywords for site {site_id}:")
+        safe_print(f"Top 10 keywords for site {site_id}:")
         for term, score in sorted_tfidf[:10]:
-            print(f"- {term}: {score:.4f}")
+            safe_print(f"- {term}: {score:.4f}")
 
         # Clear existing clusters for this site
         TopicCluster.query.filter_by(site_id=site_id).delete()
@@ -118,4 +119,4 @@ def analyze_site_content(site_id):
                 db.session.add(cluster_topic)
 
         db.session.commit()
-        print(f"Generated {num_pillars} topic clusters for site {site_id}.")
+        safe_print(f"Generated {num_pillars} topic clusters for site {site_id}.")
