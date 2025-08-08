@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+
+{% block title %}Dashboard - SEO Tool{% endblock %}
+
+{% block content %}
+    <h2>Add a New Site</h2>
+    <form action="{{ url_for('site.add_site') }}" method="post">
+        <label for="name">Site Name:</label>
+        <input type="text" id="name" name="name" required>
+        <label for="url">URL:</label>
+        <input type="url" id="url" name="url" placeholder="https://example.com" required>
+        <button type="submit">Add Site & Start Crawling</button>
+    </form>
+
+    <hr>
+
+    <h2>Your Sites</h2>
+    <div class="site-list">
+        {% if sites %}
+            <ul>
+            {% for site in sites %}
+                <li>
+                    <a href="{{ url_for('site.view_site', site_id=site.id) }}">{{ site.name }}</a>
+                    <span>({{ site.url }})</span>
+                </li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>You haven't added any sites yet. Add one above to get started!</p>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+
+{% block title %}Welcome - SEO Tool{% endblock %}
+
+{% block content %}
+    <div class="welcome-container">
+        <h1>Welcome to the SEO Topic Cluster Tool</h1>
+        <p>This tool helps you analyze your website's content and generate topic cluster ideas to boost your SEO.</p>
+        {% if not g.user %}
+        <div class="cta-buttons">
+            <a href="{{ url_for('auth.login') }}" class="button">Log In</a>
+            <a href="{{ url_for('auth.register') }}" class="button-secondary">Register</a>
+        </div>
+        {% else %}
+        <div class="cta-buttons">
+             <a href="{{ url_for('main.dashboard') }}" class="button">Go to Your Dashboard</a>
+        </div>
+        {% endif %}
+    </div>
+{% endblock %}

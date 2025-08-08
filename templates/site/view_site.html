@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ site.name }} - SEO Tool{% endblock %}
+
+{% block content %}
+    <div class="site-header">
+        <h1>{{ site.name }}</h1>
+        <p>URL: <a href="{{ site.url }}" target="_blank">{{ site.url }}</a></p>
+        <a href="{{ url_for('main.dashboard') }}" class="button-secondary">Back to Dashboard</a>
+    </div>
+
+    <hr>
+
+    <div class="analysis-section">
+        <h2>Content Analysis</h2>
+        <form action="{{ url_for('site.trigger_analysis', site_id=site.id) }}" method="post">
+            <button type="submit">Re-Analyze Content and Suggest Topics</button>
+        </form>
+        <h3>Suggested Topic Clusters</h3>
+        <form action="{{ url_for('site.generate_articles', site_id=site.id) }}" method="post">
+            <div class="cluster-list">
+            {% if clusters %}
+                <ul>
+                {% for cluster in clusters %}
+                    <li>
+                        <strong>Pillar: {{ cluster.name }}</strong>
+                        {% if cluster.children %}
+                            <ul>
+                            {% for child in cluster.children %}
+                                <li>
+                                    <input type="checkbox" name="cluster_ids" value="{{ child.id }}" id="cluster_{{ child.id }}">
+                                    <label for="cluster_{{ child.id }}">Cluster: {{ child.name }}</label>
+                                    {% if child.articles %}
+                                        (<a href="{{ url_for('site.view_article', article_id=child.articles[0].id) }}">View Article</a>)
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+                </ul>
+                <button type="submit">Generate Articles for Selected Clusters</button>
+            {% else %}
+                <p>No topic clusters suggested yet. Click the button above to analyze the site content.</p>
+            {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <hr>
+
+    <div class="crawled-pages">
+        <h2>Crawled Pages ({{ pages|length }})</h2>
+        {% if pages %}
+            <ul class="page-list">
+            {% for page in pages %}
+                <li><a href="{{ page.url }}" target="_blank">{{ page.url }}</a></li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>No pages have been crawled for this site yet. This may happen if the site was just added or if the crawler encountered an error.</p>
+        {% endif %}
+    </div>
+{% endblock %}

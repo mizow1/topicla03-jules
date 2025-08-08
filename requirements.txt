@@ -1,0 +1,10 @@
+Flask
+SQLAlchemy
+Flask-SQLAlchemy
+requests
+beautifulsoup4
+nltk
+spaCy
+gunicorn
+scikit-learn
+Markdown
