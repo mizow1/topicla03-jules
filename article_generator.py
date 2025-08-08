@@ -1,6 +1,5 @@
 import time
 from models import db, TopicCluster, Article
-from app import create_app
 from utils import safe_print
 
 def _mock_llm_call(prompt):
@@ -69,23 +68,21 @@ def generate_article_for_cluster(cluster_id):
     """
     Generates an article for a given topic cluster and saves it to the database.
     """
-    app = create_app()
-    with app.app_context():
-        cluster = db.session.get(TopicCluster, cluster_id)
-        if not cluster:
-            safe_print(f"Cluster with ID {cluster_id} not found.")
-            return
+    cluster = db.session.get(TopicCluster, cluster_id)
+    if not cluster:
+        safe_print(f"Cluster with ID {cluster_id} not found.")
+        return
 
-        # Check if an article already exists
-        if cluster.articles:
-            safe_print(f"Article for cluster '{cluster.name}' already exists. Skipping.")
-            return
+    # Check if an article already exists
+    if cluster.articles:
+        safe_print(f"Article for cluster '{cluster.name}' already exists. Skipping.")
+        return
 
-        pillar_topic = cluster.parent.name if cluster.parent else "a general topic"
-        cluster_topic = cluster.name
+    pillar_topic = cluster.parent.name if cluster.parent else "a general topic"
+    cluster_topic = cluster.name
 
-        # Construct a detailed prompt for the LLM
-        prompt = f"""
+    # Construct a detailed prompt for the LLM
+    prompt = f"""
 You are an expert SEO content writer. Your task is to write a comprehensive, high-quality article.
 
 **Main Pillar Topic:** {pillar_topic}
@@ -105,28 +102,28 @@ You are an expert SEO content writer. Your task is to write a comprehensive, hig
 **Title suggestion:** The Ultimate Guide to {cluster_topic.title()}
 """
 
-        # Simulate the LLM call
-        generated_content = _mock_llm_call(prompt)
+    # Simulate the LLM call
+    generated_content = _mock_llm_call(prompt)
 
-        # Parse the response
-        try:
-            header, body_markdown = generated_content.split('\n---\n', 1)
-            title = next(line for line in header.split('\n') if line.startswith("TITLE:")).replace("TITLE:", "").strip()
-            meta_description = next(line for line in header.split('\n') if line.startswith("META_DESCRIPTION:")).replace("META_DESCRIPTION:", "").strip()
-        except (ValueError, StopIteration):
-            safe_print("Error parsing LLM response. Saving with placeholder data.")
-            title = cluster.name.title()
-            meta_description = f"An in-depth look at {cluster.name}."
-            body_markdown = generated_content # Save the whole thing if parsing fails
+    # Parse the response
+    try:
+        header, body_markdown = generated_content.split('\n---\n', 1)
+        title = next(line for line in header.split('\n') if line.startswith("TITLE:")).replace("TITLE:", "").strip()
+        meta_description = next(line for line in header.split('\n') if line.startswith("META_DESCRIPTION:")).replace("META_DESCRIPTION:", "").strip()
+    except (ValueError, StopIteration):
+        safe_print("Error parsing LLM response. Saving with placeholder data.")
+        title = cluster.name.title()
+        meta_description = f"An in-depth look at {cluster.name}."
+        body_markdown = generated_content # Save the whole thing if parsing fails
 
-        # Create and save the new article
-        new_article = Article(
-            title=title,
-            meta_description=meta_description,
-            tags=f"{pillar_topic}, {cluster_topic}",
-            body_markdown=body_markdown,
-            topic_cluster_id=cluster.id
-        )
-        db.session.add(new_article)
-        db.session.commit()
-        safe_print(f"Successfully generated and saved article for cluster: '{cluster.name}'")
+    # Create and save the new article
+    new_article = Article(
+        title=title,
+        meta_description=meta_description,
+        tags=f"{pillar_topic}, {cluster_topic}",
+        body_markdown=body_markdown,
+        topic_cluster_id=cluster.id
+    )
+    db.session.add(new_article)
+    db.session.commit()
+    safe_print(f"Successfully generated and saved article for cluster: '{cluster.name}'")

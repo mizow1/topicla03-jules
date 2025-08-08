@@ -25,8 +25,8 @@ def create_app():
     from auth import auth_bp
     app.register_blueprint(auth_bp)
 
-    from main import main_bp
-    app.register_blueprint(main_bp)
+    import main
+    app.register_blueprint(main.main_bp)
 
     from site_views import site_bp
     app.register_blueprint(site_bp)
