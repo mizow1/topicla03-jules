@@ -5,7 +5,7 @@ main_bp = Blueprint('main', __name__, template_folder='templates')
 
 @main_bp.route('/')
 def index():
-    return render_template('main/index.html', user=g.user)
+    return render_template('main/index.html')
 
 from models import Site
 
@@ -13,4 +13,4 @@ from models import Site
 @login_required
 def dashboard():
     sites = Site.query.filter_by(user_id=g.user.id).all()
-    return render_template('main/dashboard.html', user=g.user, sites=sites)
+    return render_template('main/dashboard.html', sites=sites)

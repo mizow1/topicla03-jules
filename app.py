@@ -11,6 +11,11 @@ def create_app():
         SQLALCHEMY_DATABASE_URI='sqlite:///site.db',
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
     )
+    
+    # Enable debug mode and logging
+    app.config['DEBUG'] = True
+    import logging
+    logging.basicConfig(level=logging.DEBUG)
 
     # Ensure the instance folder exists - no longer needed as we are not using it for the db
     # try:
@@ -49,4 +54,11 @@ def create_app():
 app = create_app()
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    try:
+        print("サーバーを起動しています...")
+        print("URL: http://localhost:3000")
+        app.run(debug=True, host='localhost', port=3000, threaded=True)
+    except Exception as e:
+        print(f"サーバー起動エラー: {e}")
+        print("代替ポートで再試行...")
+        app.run(debug=True, host='localhost', port=0, threaded=True)
